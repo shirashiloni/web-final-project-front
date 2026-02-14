@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { User } from "../types/User";
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
@@ -8,7 +9,7 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
-export const getMyUser = async () => {
+export const getMyUser = async (): Promise<User> => {
   const response = await axios.get("/auth/me");
   return response.data;
 }
