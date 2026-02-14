@@ -1,8 +1,13 @@
 import React from 'react';
 import PostList from '../components/PostList';
 import { Box, Button, Typography, Avatar } from '@mui/material';
+import { useLogout } from '../hooks/useAuth';
+import { useUser } from '../hooks/useUser';
 
 const ProfileView: React.FC = () => {
+  const handleLogout = useLogout();
+  const { user } = useUser();
+
   const posts = [
     { id: 1, title: 'Post 1', content: 'This is the content of post 1.',  },
     { id: 2, title: 'Post 2', content: 'This is the content of post 2.' },
@@ -15,10 +20,6 @@ const ProfileView: React.FC = () => {
     { id: 9, title: 'Post 9', content: 'This is the content of post 3.' },
     { id: 10, title: 'Post 10', content: 'This is the content of post 4.' },
   ];
-
-  const handleLogout = () => {
-    alert('Logged out!');
-  };
 
   return (
     <Box
@@ -46,7 +47,7 @@ const ProfileView: React.FC = () => {
           }}
         />
         <Typography variant="h6" sx={{ marginBottom: '20px' }}>
-          Username
+          {user!.name}
         </Typography>
       </Box>
 
