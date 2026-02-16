@@ -1,4 +1,3 @@
-
 import { Routes, Route, useLocation } from 'react-router-dom';
 import TopBar from './components/TopBar';
 import ProfileView from './views/Profile';
@@ -7,7 +6,6 @@ import ShareView from './views/NewPost';
 import LoginView from './views/Login';
 import RegistrationView from './views/Registration';
 import ProtectedRoute from './components/ProtectedRoute';
-
 
 const App = () => {
   const location = useLocation();

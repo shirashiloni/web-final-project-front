@@ -9,7 +9,7 @@ const ProfileView: React.FC = () => {
   const { user } = useUser();
 
   const posts = [
-    { id: 1, title: 'Post 1', content: 'This is the content of post 1.',  },
+    { id: 1, title: 'Post 1', content: 'This is the content of post 1.' },
     { id: 2, title: 'Post 2', content: 'This is the content of post 2.' },
     { id: 3, title: 'Post 3', content: 'This is the content of post 3.' },
     { id: 4, title: 'Post 4', content: 'This is the content of post 4.' },
@@ -53,12 +53,7 @@ const ProfileView: React.FC = () => {
 
       <PostList posts={posts} />
 
-      <Button
-        variant="contained"
-        color="error"
-        sx={{ marginTop: '20px' }}
-        onClick={handleLogout}
-      >
+      <Button variant="contained" color="error" sx={{ marginTop: '20px' }} onClick={handleLogout}>
         Logout
       </Button>
     </Box>
