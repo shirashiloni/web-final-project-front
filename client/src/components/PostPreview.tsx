@@ -10,13 +10,13 @@ type PostPreviewProps = {
 };
 
 const PostPreview = ({ post }: PostPreviewProps) => {
-  const { caption, imageUrl = 'https://picsum.photos/200/300' } = post;
+  const { caption, imageUrl } = post;
   const [likes] = useState(0);
   const [comments] = useState(0);
 
   return (
     <Card sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid rgba(240, 240, 241, 1)', margin: 1 }}>
-      <CardMedia sx={{ width: '100%', aspectRatio: '1' }} image={imageUrl} />
+      <CardMedia sx={{ width: '100%', aspectRatio: '1' }} image={`/api${imageUrl}`} />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
           {caption}

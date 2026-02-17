@@ -10,7 +10,7 @@ interface PostListProps {
 const PostList = ({ posts }: PostListProps) => {
   return (
     <Stack direction="row" flexWrap="wrap" justifyContent={'center'} gap={2}>
-      {posts.map((post) => (
+      {posts?.map((post) => (
         <PostPreview key={post.id} post={post} />
       ))}
     </Stack>
