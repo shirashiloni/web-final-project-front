@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { User } from '../types/User';
 
 axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -10,6 +10,6 @@ axios.interceptors.request.use((config) => {
 });
 
 export const getMyUser = async (): Promise<User> => {
-  const response = await axios.get('/auth/me');
+  const response = await axios.get("/api/user/me");
   return response.data;
 };
