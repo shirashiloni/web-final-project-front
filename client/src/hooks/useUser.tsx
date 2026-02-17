@@ -1,6 +1,6 @@
 import { atom, useAtom } from "jotai";
 import type { User } from "../types/User";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getMyUser } from "../api/users";
 
 export const userAtom = atom<User | null>(null);
