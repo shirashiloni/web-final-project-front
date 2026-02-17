@@ -4,7 +4,7 @@ import axios from 'axios';
 export const uploadImage = async (img: File) => {
   const formData = new FormData();
   formData.append('file', img);
-  const { data } = await axios.post(`/api/files?file=${img.name}`, formData, {
+  const { data } = await axios.post(`/api/upload`, formData, {
     headers: {
       'Content-Type': 'image/*',
     },

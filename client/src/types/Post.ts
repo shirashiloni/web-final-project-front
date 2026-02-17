@@ -1,7 +1,6 @@
 type Post = {
   id: number;
-  title: string;
-  content: string;
+  caption: string;
   imageUrl?: string;
 };
 

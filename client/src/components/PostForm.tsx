@@ -16,11 +16,11 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import PostPreview from './PostPreview';
 import { createPost } from '../api/posts';
 import { uploadImage } from '../hooks/useFiles';
+import { useUser } from '../hooks/useUser';
 
 interface PostFormProps {
   existingPost?: {
-    title: string;
-    content: string;
+    caption: string
     imageUrl: string;
     id: string;
   };
@@ -28,9 +28,10 @@ interface PostFormProps {
 
 const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const defaultValues = existingPost
-    ? { title: existingPost.title, content: existingPost.content, img: undefined }
-    : { title: undefined, content: undefined, img: undefined };
+    ? { caption: existingPost.caption, img: undefined }
+    : { caption: undefined, img: undefined };
 
   undefined;
   const {
@@ -43,8 +44,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
     defaultValues,
   });
 
-  const watchedTitle = watch('title');
-  const watchedContent = watch('content');
+  const watchedCaption = watch('caption');
   const [error, setError] = useState('');
   const [isPending, setPending] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(existingPost?.imageUrl);
@@ -52,12 +52,11 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
 
   const previewPost = useMemo(() => {
     return {
-      title: watchedTitle || 'Post Title',
-      content: watchedContent || 'Your post content will be previewed here.',
+      caption: watchedCaption || 'Post Title',
     };
-  }, [watchedTitle, watchedContent]);
+  }, [watchedCaption]);
 
-  const onSubmit = async (data: { title?: string; img?: File; content?: string }) => {
+  const onSubmit = async (data: { caption?: string; img?: File; content?: string }) => {
     setError('');
     try {
       if (existingPost) {
@@ -67,8 +66,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
         const uploadImageData = await uploadImage(data.img!);
 
         await createPost({
-          title: data.title,
-          content: data.content,
+          caption: data.caption,
           imageUrl: uploadImageData.url,
         });
       }
@@ -140,35 +138,17 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
           )}
           {!useAISuggestion && (
             <Controller
-              name="title"
+              name="caption"
               control={control}
-              rules={{ required: 'Title is required' }}
+              rules={{ required: 'Caption is required' }}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Title"
+                  label="Caption"
                   variant="outlined"
                   fullWidth
-                  error={!!errors.title}
-                  helperText={errors.title ? errors.title.message : ' '}
-                />
-              )}
-            />
-          )}
-          {!useAISuggestion && (
-            <Controller
-              name="content"
-              control={control}
-              rules={{ required: 'Content is required' }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Content"
-                  variant="outlined"
-                  fullWidth
-                  rows={4}
-                  error={!!errors.content}
-                  helperText={errors.content ? errors.content.message : ' '}
+                  error={!!errors.caption}
+                  helperText={errors.caption ? errors.caption.message : ' '}
                 />
               )}
             />
