@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Post } from '../types/Post';
+import type { IPostCreate } from '../types/Post';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -9,7 +9,7 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
-export const createPost = async (data: Partial<Post>) => {
+export const createPost = async (data: IPostCreate) => {
   const response = await axios.post('/api/post/', data);
   return response.data;
 };
