@@ -1,35 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import { Routes, Route, useLocation } from 'react-router-dom';
+import TopBar from './components/TopBar';
+import ProfileView from './views/Profile';
+import FeedView from './views/Feed';
+import ShareView from './views/NewPost';
+import LoginView from './views/Login';
+import RegistrationView from './views/Registration';
+import ProtectedRoute from './components/ProtectedRoute';
+
+
+const App = () => {
+  const location = useLocation();
+
+  const noTopBarRoutes = ['/login', '/register'];
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {!noTopBarRoutes.includes(location.pathname) && <TopBar />}
+      <Routes>
+        <Route index path="/login" element={<LoginView />} />
+        <Route path="/register" element={<RegistrationView />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/feed" element={<FeedView />} />
+          <Route path="/profile" element={<ProfileView />} />
+          <Route path="/post" element={<ShareView />} />
+        </Route>
+      </Routes>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
