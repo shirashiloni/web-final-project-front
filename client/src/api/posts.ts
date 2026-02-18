@@ -18,3 +18,8 @@ export const getPosts = async (): Promise<{ data: Post[] }> => {
   const response = await axios.get('/api/post/');
   return response.data;
 };
+
+export const getUsersPosts = async (userId: string): Promise<Post[]> => {
+  const response = await axios.get(`/api/post/user/${userId}`);
+  return response.data;
+};

@@ -99,7 +99,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
         const uploadImageData = await uploadImage(data.img!);
 
         await createPost({
-          user: user.email,
+          userId: user._id,
           caption: data.caption,
           imageUrl: uploadImageData.url,
         });
@@ -162,7 +162,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
                 />
 
                 {preview ? (
-                  <Box>
+                  <Box sx={{ position: 'relative', display: 'inline-block', marginTop: 5 }}>
                     <IconButton
                       size="small"
                       onClick={(e) => {
@@ -174,8 +174,10 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
                         }
                       }}
                       sx={{
-                        top: 55,
-                        left: 5,
+                        position: 'absolute',
+                        top: 10,
+                        left: 10,
+                        zIndex: 1,
                         backgroundColor: 'rgba(0,0,0,0.5)',
                         color: 'white',
                         '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
@@ -189,8 +191,9 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
                       style={{
                         width: 400,
                         height: 250,
-                        objectFit: 'contain',
+                        objectFit: 'cover',
                         borderRadius: '8px',
+                        display: 'block',
                       }}
                     />
                   </Box>
