@@ -1,0 +1,277 @@
+import React, { useMemo, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  IconButton,
+  FormControlLabel,
+  Switch,
+} from '@mui/material';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CloseIcon from '@mui/icons-material/Close';
+
+import PostPreview from './PostPreview';
+import { createPost } from '../api/posts';
+import { uploadImage } from '../hooks/useFiles';
+import { useUser } from '../hooks/useUser';
+
+interface PostFormProps {
+  existingPost?: {
+    caption: string;
+    imageUrl: string;
+    id: string;
+  };
+}
+
+const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
+  const navigate = useNavigate();
+  const { user } = useUser();
+  const defaultValues = existingPost
+    ? { caption: existingPost.caption, img: undefined }
+    : { caption: undefined, img: undefined };
+
+  undefined;
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm({
+    defaultValues,
+  });
+
+  const watchedCaption = watch('caption');
+  const [error, setError] = useState('');
+  const [isPending, setPending] = useState(false);
+  const [preview, setPreview] = useState<string | undefined>(existingPost?.imageUrl);
+  const [useAISuggestion, setUseAISuggestion] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (file: File, onChange: (value: File) => void) => {
+    onChange(file);
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+
+    // Clean up memory
+    return () => URL.revokeObjectURL(objectUrl);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent, onChange: (value: File) => void) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+      handleImageChange(file, onChange);
+    }
+  };
+
+  const previewPost = useMemo(() => {
+    return {
+      caption: watchedCaption || 'Post Title',
+    };
+  }, [watchedCaption]);
+
+  const onSubmit = async (data: { caption?: string; img?: File; content?: string }) => {
+    setError('');
+    try {
+      if (existingPost) {
+        // await updatePost({ postId: existingPost.id, post: { content: data.content, title: data.title }, img: data.img });
+      } else if (user && data.caption) {
+        setPending(true);
+        const uploadImageData = await uploadImage(data.img!);
+
+        await createPost({
+          user: user.email,
+          caption: data.caption,
+          imageUrl: uploadImageData.url,
+        });
+      }
+      setPending(false);
+      reset();
+      navigate('/explore');
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      setError('Failed to upload post');
+    }
+  };
+
+  return (
+    <>
+      <Stack
+        direction="row"
+        spacing={4}
+        sx={{ p: 4, justifyContent: 'center', alignItems: 'stretch' }}
+      >
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{
+            flex: 1,
+            maxWidth: 400,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          {error && (
+            <Typography color="error" variant="body2">
+              {error}
+            </Typography>
+          )}
+          <Controller
+            name="img"
+            control={control}
+            rules={{ required: existingPost ? false : 'Image is required' }}
+            render={({ field: { onChange } }) => (
+              <Box
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, onChange)}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  accept="image/jpeg, image/png"
+                  style={{ display: 'none' }}
+                  id="image-upload"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleImageChange(file, onChange);
+                    }
+                  }}
+                />
+
+                {preview ? (
+                  <Box>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreview(undefined);
+                        onChange(undefined);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = '';
+                        }
+                      }}
+                      sx={{
+                        top: 55,
+                        left: 5,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        color: 'white',
+                        '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      style={{
+                        width: 400,
+                        height: 250,
+                        objectFit: 'contain',
+                        borderRadius: '8px',
+                      }}
+                    />
+                  </Box>
+                ) : (
+                  <Box marginTop={5} height={250}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <AddPhotoAlternateIcon
+                        sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }}
+                      />
+                      <Typography variant="body1" color="text.primary" fontWeight="medium">
+                        Drag & Drop or Click
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      to upload an image
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            )}
+          />
+          {!existingPost && (
+            <Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={useAISuggestion}
+                    onChange={(e) => setUseAISuggestion(e.target.checked)}
+                  />
+                }
+                label="Use AI Suggestions"
+              />
+              <Typography
+                variant="caption"
+                display="block"
+                sx={{ color: 'text.secondary', mt: -1, ml: 4 }}
+              >
+                Automatically generate a caption using AI
+              </Typography>
+            </Box>
+          )}
+          {!useAISuggestion && (
+            <Controller
+              name="caption"
+              control={control}
+              rules={{ required: 'Caption is required' }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Caption"
+                  variant="outlined"
+                  fullWidth
+                  error={!!errors.caption}
+                  helperText={errors.caption ? errors.caption.message : ' '}
+                />
+              )}
+            />
+          )}
+          {isPending ? (
+            <Typography>Uploading...</Typography>
+          ) : (
+            <Button type="submit" variant="contained">
+              Upload Post
+            </Button>
+          )}
+        </Box>
+        <Box sx={{ flex: 1, maxWidth: 400 }}>
+          <Typography variant="h5" gutterBottom>
+            Post Preview
+          </Typography>
+          <PostPreview
+            post={{
+              ...previewPost,
+              imageUrl: preview || '',
+              id: 0,
+            }}
+          />
+        </Box>
+      </Stack>
+    </>
+  );
+};
+
+export default PostForm;

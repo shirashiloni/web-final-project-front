@@ -1,19 +1,12 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  useTheme,
-  CircularProgress,
-} from "@mui/material";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useNavigate, Link } from "react-router-dom";
-import { useUser } from "../hooks/useUser";
-import { registerUser } from "../api/auth";
-import { getMyUser } from "../api/users";
+import React, { useState } from 'react';
+import { Box, Button, TextField, Typography, useTheme, CircularProgress } from '@mui/material';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useNavigate, Link } from 'react-router-dom';
+import { useUser } from '../hooks/useUser';
+import { registerUser } from '../api/auth';
+import { getMyUser } from '../api/users';
 
 interface RegistrationFormInputs {
   name: string;
@@ -22,12 +15,9 @@ interface RegistrationFormInputs {
 }
 
 const registrationSchema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-  email: yup
-    .string()
-    .email("Must be a valid email")
-    .required("Email is required"),
-  password: yup.string().required("Password is required"),
+  name: yup.string().required('Name is required'),
+  email: yup.string().email('Must be a valid email').required('Email is required'),
+  password: yup.string().required('Password is required'),
 });
 
 const Register: React.FC = () => {
@@ -50,16 +40,16 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-    const { token, refreshToken } = await registerUser(data);
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('refreshToken', refreshToken);
+      const { token, refreshToken } = await registerUser(data);
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('refreshToken', refreshToken);
 
-    const user = await getMyUser()
-    setUser(user);
-    navigate("/feed");
+      const user = await getMyUser();
+      setUser(user);
+      navigate('/feed');
     } catch (error) {
       console.error(error);
-      setErrorMessage("Registration failed. Please try again.");
+      setErrorMessage('Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -69,14 +59,14 @@ const Register: React.FC = () => {
     <Box
       sx={{
         backgroundColor: theme.palette.background.default,
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         p: 2,
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 400, textAlign: "center" }}>
+      <Box sx={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>
           Register
         </Typography>
@@ -91,7 +81,7 @@ const Register: React.FC = () => {
             variant="outlined"
             fullWidth
             margin="normal"
-            {...register("name")}
+            {...register('name')}
             error={!!errors.name}
             helperText={errors.name?.message}
           />
@@ -100,7 +90,7 @@ const Register: React.FC = () => {
             variant="outlined"
             fullWidth
             margin="normal"
-            {...register("email")}
+            {...register('email')}
             error={!!errors.email}
             helperText={errors.email?.message}
           />
@@ -110,7 +100,7 @@ const Register: React.FC = () => {
             type="password"
             fullWidth
             margin="normal"
-            {...register("password")}
+            {...register('password')}
             error={!!errors.password}
             helperText={errors.password?.message}
           />
@@ -122,19 +112,15 @@ const Register: React.FC = () => {
             sx={{ mt: 2, py: 1.5 }}
             disabled={isLoading}
           >
-            {isLoading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Register"
-            )}
+            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
           </Button>
         </form>
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Already have an account?{" "}
+          Already have an account?{' '}
           <Link
             to="/login"
             style={{
-              textDecoration: "none",
+              textDecoration: 'none',
               color: theme.palette.primary.main,
             }}
           >

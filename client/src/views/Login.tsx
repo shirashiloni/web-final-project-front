@@ -1,19 +1,12 @@
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  CircularProgress,
-  useTheme
-} from "@mui/material";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useNavigate, Link } from "react-router-dom";
-import { useUser } from "../hooks/useUser";
-import { loginUser } from "../api/auth";
-import { getMyUser } from "../api/users";
+import React, { useEffect, useState } from 'react';
+import { Box, Button, TextField, Typography, CircularProgress, useTheme } from '@mui/material';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useNavigate, Link } from 'react-router-dom';
+import { useUser } from '../hooks/useUser';
+import { loginUser } from '../api/auth';
+import { getMyUser } from '../api/users';
 
 interface LoginFormInputs {
   email: string;
@@ -21,12 +14,12 @@ interface LoginFormInputs {
 }
 
 const loginSchema = yup.object().shape({
-  email: yup.string().required("Email is required"),
-  password: yup.string().required("Password is required"),
+  email: yup.string().required('Email is required'),
+  password: yup.string().required('Password is required'),
 });
 
 const Login: React.FC = () => {
-    const theme = useTheme();
+  const theme = useTheme();
   const { user, setUser } = useUser();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -45,37 +38,37 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-    const { token, refreshToken } = await loginUser(data);
+      const { token, refreshToken } = await loginUser(data);
 
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('refreshToken', refreshToken);
-    
-    const user = await getMyUser()
-    setUser(user);
-    navigate("/feed");
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('refreshToken', refreshToken);
+
+      const user = await getMyUser();
+      setUser(user);
+      navigate('/feed');
     } catch (error) {
       console.error(error);
-      setErrorMessage("Invalid email or password. Please try again.");
+      setErrorMessage('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) navigate("/feed");
+    if (user) navigate('/feed');
   }, [navigate, user]);
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         p: 2,
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 400, textAlign: "center" }}>
+      <Box sx={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>
           Login
         </Typography>
@@ -90,7 +83,7 @@ const Login: React.FC = () => {
             variant="outlined"
             fullWidth
             margin="normal"
-            {...register("email")}
+            {...register('email')}
             error={!!errors.email}
             helperText={errors.email?.message}
           />
@@ -100,7 +93,7 @@ const Login: React.FC = () => {
             type="password"
             fullWidth
             margin="normal"
-            {...register("password")}
+            {...register('password')}
             error={!!errors.password}
             helperText={errors.password?.message}
           />
@@ -111,20 +104,16 @@ const Login: React.FC = () => {
             fullWidth
             sx={{ mt: 2, py: 1.5 }}
           >
-            {isLoading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Login"
-            )}
+            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
           </Button>
         </form>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <Link
             to="/register"
             style={{
-              textDecoration: "none",
+              textDecoration: 'none',
               color: theme.palette.primary.main,
             }}
           >

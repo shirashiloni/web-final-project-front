@@ -1,5 +1,5 @@
-import { useUser } from "./useUser";
-import { useNavigate } from "react-router-dom";
+import { useUser } from './useUser';
+import { useNavigate } from 'react-router-dom';
 
 export const useLogout = () => {
   const navigate = useNavigate();
@@ -9,8 +9,8 @@ export const useLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     setUser(null);
-    navigate("/login");
-  }
+    navigate('/login');
+  };
 
   return handleLogout;
-}
+};
