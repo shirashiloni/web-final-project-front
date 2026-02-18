@@ -11,7 +11,7 @@ const ProfileView: React.FC = () => {
   const { user } = useUser();
 
   const response = useQuery({
-    queryKey: ['posts'],
+    queryKey: ['user-posts', user?._id],
     queryFn: () => getUsersPosts(user!._id),
     enabled: !!user?._id,
   });
