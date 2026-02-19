@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { IPostCreate, Post } from '../types/Post';
+import type { IPostCreate, IPostUpdate, Post } from '../types/Post';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -21,5 +21,14 @@ export const getPosts = async (): Promise<{ data: Post[] }> => {
 
 export const getUsersPosts = async (userId: string): Promise<Post[]> => {
   const response = await axios.get(`/api/post/user/${userId}`);
+  return response.data;
+};
+
+export const deletePost = async (postId: string): Promise<void> => {
+  await axios.delete(`/api/post/${postId}`);
+};
+
+export const updatePost = async (postId: string, data: IPostUpdate): Promise<Post> => {
+  const response = await axios.put(`/api/post/${postId}`, data);
   return response.data;
 };
