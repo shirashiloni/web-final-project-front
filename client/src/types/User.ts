@@ -4,4 +4,5 @@ export type User = {
   password: string;
   refreshTokens: string[];
   name: string;
+  profileImage?: string;
 };
