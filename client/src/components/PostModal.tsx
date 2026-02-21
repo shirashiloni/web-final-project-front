@@ -5,6 +5,7 @@ import CommentIcon from '@mui/icons-material/Comment';
 import type { Post } from '../types/Post';
 import { useEffect, useState } from 'react';
 import { usePosts } from '../hooks/usePosts';
+import CommentsSection from './CommentsSection';
 import { useUser } from '../hooks/useUser';
 
 type PostModalProps = {
@@ -17,16 +18,14 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
   const [likeCount, setLikeCount] = useState(post?.likeCount || 0);
   const [liked, setLiked] = useState(false);
   const { likeMutation, unlikeMutation, checkUserLiked } = usePosts();
-
   const postId = post._id ?? String(post.id);
+  const commentsCount = post.commentsCount || 0;
 
   useEffect(() => {
     if (user && postId) {
       checkUserLiked(postId, user._id).then(setLiked);
     }
   }, [user, postId, checkUserLiked]);
-
-
   const onClickLike = async () => {
     if (!user) return;
     if (liked) {
@@ -75,12 +74,13 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
               <Typography variant="body2">{likeCount}</Typography>
             </Stack>
             <Stack direction="row" gap={0.5} alignItems="center">
-              <IconButton disabled color="default" size="small">
+              <IconButton color="default" size="small">
                 <CommentIcon fontSize="small" />
               </IconButton>
-              <Typography variant="body2">0</Typography>
+              <Typography variant="body2">{commentsCount}</Typography>
             </Stack>
           </Stack>
+          <CommentsSection postId={postId} userId={user?._id} />
         </DialogContent>
       </Box>
     </Dialog>

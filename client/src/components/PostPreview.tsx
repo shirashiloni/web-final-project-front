@@ -28,25 +28,20 @@ import PostForm from './PostForm';
 type PostPreviewProps = {
   post: Post;
   isOwner?: boolean;
+  onClick?: () => void;
 };
 
-const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
+const PostPreview = ({ post, isOwner = false, onClick }: PostPreviewProps) => {
   const { caption, imageUrl } = post;
   const postId = post._id ?? String(post.id);
+  const commentsCount = post.commentsCount || 0;
 
   const { user } = useUser();
   const [likeCount, setLikeCount] = useState(post.likeCount || 0);
-  const [comments] = useState(0);
   const [liked, setLiked] = useState(false);
-
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
-
-  // Delete confirm dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  // Edit mode state
   const [editOpen, setEditOpen] = useState(false);
 
   const { likeMutation, unlikeMutation, deleteMutation, checkUserLiked } = usePosts();
@@ -99,7 +94,9 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
           border: '1px solid rgba(240, 240, 241, 1)',
           margin: 1,
           position: 'relative',
+          cursor: onClick ? 'pointer' : 'default',
         }}
+        onClick={onClick}
       >
         {isOwner && (
           <Box sx={{ position: 'absolute', top: 4, right: 4, zIndex: 2 }}>
@@ -162,15 +159,14 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
           </Stack>
 
           <Stack direction={'row'} gap={1} alignItems={'center'} margin={1}>
-            <IconButton disabled color="primary">
+            <IconButton color="primary">
               <CommentIcon />
             </IconButton>
-            <Typography variant="body2">{comments}</Typography>
+            <Typography variant="body2">{commentsCount}</Typography>
+
           </Stack>
         </Stack>
       </Card>
-
-      {/* Delete confirmation dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Delete Post</DialogTitle>
         <DialogContent>
