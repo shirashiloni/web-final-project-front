@@ -1,21 +1,13 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Stack,
-  IconButton,
-  FormControlLabel,
-  Switch,
-} from '@mui/material';
+import { Box, Button, TextField, Typography, Stack, IconButton } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
+import { useQueryClient } from '@tanstack/react-query';
 
 import PostPreview from './PostPreview';
-import { createPost } from '../api/posts';
+import { createPost, updatePost } from '../api/posts';
 import { uploadImage } from '../hooks/useFiles';
 import { useUser } from '../hooks/useUser';
 
@@ -25,16 +17,18 @@ interface PostFormProps {
     imageUrl: string;
     id: string;
   };
+  onSuccess?: () => void;
 }
 
-const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
+const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
   const navigate = useNavigate();
   const { user } = useUser();
+  const queryClient = useQueryClient();
+
   const defaultValues = existingPost
     ? { caption: existingPost.caption, img: undefined }
     : { caption: undefined, img: undefined };
 
-  undefined;
   const {
     control,
     handleSubmit,
@@ -48,7 +42,15 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
   const watchedCaption = watch('caption');
   const [error, setError] = useState('');
   const [isPending, setPending] = useState(false);
-  const [preview, setPreview] = useState<string | undefined>(existingPost?.imageUrl);
+  const normalizeImageUrl = (url?: string) => {
+    if (!url) return undefined;
+    if (url.startsWith('blob:') || url.startsWith('http')) return url;
+    return `/api${url}`;
+  };
+
+  const [preview, setPreview] = useState<string | undefined>(
+    normalizeImageUrl(existingPost?.imageUrl)
+  );
   const [isDragOver, setIsDragOver] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,8 +59,6 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
     onChange(file);
     const objectUrl = URL.createObjectURL(file);
     setPreview(objectUrl);
-
-    // Clean up memory
     return () => URL.revokeObjectURL(objectUrl);
   };
 
@@ -75,7 +75,6 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
   const handleDrop = (e: React.DragEvent, onChange: (value: File) => void) => {
     e.preventDefault();
     setIsDragOver(false);
-
     const file = e.dataTransfer.files?.[0];
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       handleImageChange(file, onChange);
@@ -88,28 +87,43 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
     };
   }, [watchedCaption]);
 
-  const onSubmit = async (data: { caption?: string; img?: File; content?: string }) => {
+  const onSubmit = async (data: { caption?: string; img?: File }) => {
     setError('');
     try {
-      if (existingPost) {
-        // await updatePost({ postId: existingPost.id, post: { content: data.content, title: data.title }, img: data.img });
-      } else if (user) {
-        setPending(true);
-        const uploadImageData = await uploadImage(data.img!);
+      setPending(true);
 
+      if (existingPost) {
+        let imageUrl = existingPost.imageUrl;
+        if (data.img) {
+          const uploadImageData = await uploadImage(data.img);
+          imageUrl = uploadImageData.url;
+        }
+        await updatePost(existingPost.id, {
+          caption: data.caption,
+          imageUrl,
+        });
+        queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+        setPending(false);
+        reset();
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else if (user) {
+        const uploadImageData = await uploadImage(data.img!);
         await createPost({
           userId: user._id,
           caption: data.caption || '',
-
           imageUrl: uploadImageData.url,
         });
+        queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+        setPending(false);
+        reset();
+        navigate('/explore');
       }
-      setPending(false);
-      reset();
-      navigate('/explore');
     } catch (err: unknown) {
+      setPending(false);
       if (err instanceof Error) setError(err.message);
-      setError('Failed to upload post');
+      else setError('Failed to upload post');
     }
   };
 
@@ -146,6 +160,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, onChange)}
                 onClick={() => fileInputRef.current?.click()}
+                sx={{ cursor: 'pointer' }}
               >
                 <input
                   type="file"
@@ -231,10 +246,10 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
             )}
           />
           {isPending ? (
-            <Typography>Uploading...</Typography>
+            <Typography>{existingPost ? 'Saving...' : 'Uploading...'}</Typography>
           ) : (
             <Button type="submit" variant="contained">
-              Upload Post
+              {existingPost ? 'Save Changes' : 'Upload Post'}
             </Button>
           )}
         </Box>

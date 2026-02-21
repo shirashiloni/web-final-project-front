@@ -48,7 +48,7 @@ const ProfileView: React.FC = () => {
         </Typography>
       </Box>
 
-      <PostList posts={posts ? posts : []} />
+      <PostList posts={posts ? posts : []} isOwner={true} />
 
       <Button variant="contained" color="error" sx={{ marginTop: '20px' }} onClick={handleLogout}>
         Logout

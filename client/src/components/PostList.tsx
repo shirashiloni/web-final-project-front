@@ -5,13 +5,14 @@ import PostPreview from './PostPreview';
 
 interface PostListProps {
   posts: Post[];
+  isOwner?: boolean;
 }
 
-const PostList = ({ posts }: PostListProps) => {
+const PostList = ({ posts, isOwner = false }: PostListProps) => {
   return (
     <Stack direction="row" flexWrap="wrap" justifyContent={'center'} gap={2}>
       {posts?.map((post) => (
-        <PostPreview key={post.id} post={post} />
+        <PostPreview key={post._id ?? post.id} post={post} isOwner={isOwner} />
       ))}
     </Stack>
   );
