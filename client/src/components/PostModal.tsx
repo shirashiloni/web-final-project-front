@@ -3,12 +3,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
 import type { Post } from '../types/Post';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePosts } from '../hooks/usePosts';
 import { useUser } from '../hooks/useUser';
 
 type PostModalProps = {
-  post: Post | null;
+  post: Post;
   onClose: () => void;
 };
 
@@ -16,9 +16,16 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
   const { user } = useUser();
   const [likeCount, setLikeCount] = useState(post?.likeCount || 0);
   const [liked, setLiked] = useState(false);
-  const { likeMutation, unlikeMutation } = usePosts();
-  if (!post) return null;
+  const { likeMutation, unlikeMutation, checkUserLiked } = usePosts();
+
   const postId = post._id ?? String(post.id);
+
+  useEffect(() => {
+    if (user && postId) {
+      checkUserLiked(postId, user._id).then(setLiked);
+    }
+  }, [user, postId, checkUserLiked]);
+
 
   const onClickLike = async () => {
     if (!user) return;

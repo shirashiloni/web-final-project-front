@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePosts } from '../hooks/usePosts';
 import { useUser } from '../hooks/useUser';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -39,6 +39,7 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
   const [comments] = useState(0);
   const [liked, setLiked] = useState(false);
 
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
@@ -48,7 +49,13 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
   // Edit mode state
   const [editOpen, setEditOpen] = useState(false);
 
-  const { likeMutation, unlikeMutation, deleteMutation } = usePosts();
+  const { likeMutation, unlikeMutation, deleteMutation, checkUserLiked } = usePosts();
+
+  useEffect(() => {
+    if (user && postId) {
+      checkUserLiked(postId, user._id).then(setLiked);
+    }
+  }, [user, postId, checkUserLiked]);
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();

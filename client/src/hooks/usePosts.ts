@@ -6,6 +6,7 @@ import {
     deletePost,
     likePost,
     unlikePost,
+    getUserLikeStatus,
 } from '../api/posts';
 import type { IPostCreate, IPostUpdate, PostQuery } from '../types/Post';
 import { useMemo } from 'react';
@@ -50,10 +51,10 @@ export function usePosts(userId?: string) {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['posts'] }),
     });
 
-    // const checkUserLiked = async (postId: string, userId: string) => {
-    //     const res = await getUserLikeStatus(postId, userId);
-    //     return res.liked;
-    // };
+    const checkUserLiked = async (postId: string, userId: string) => {
+        const res = await getUserLikeStatus(postId, userId);
+        return res.liked;
+    };
 
     return {
         posts,
@@ -64,6 +65,6 @@ export function usePosts(userId?: string) {
         deleteMutation,
         likeMutation,
         unlikeMutation,
-        // checkUserLiked,
+        checkUserLiked,
     };
 }

@@ -38,3 +38,8 @@ export const unlikePost = async (postId: string, userId: string): Promise<{ like
   return response.data;
 };
 
+export const getUserLikeStatus = async (postId: string, userId: string): Promise<{ liked: boolean }> => {
+  const response = await axios.get(`/api/like/status?postId=${postId}&userId=${userId}`);
+  return response.data;
+};
+

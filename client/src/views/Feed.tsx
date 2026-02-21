@@ -65,7 +65,7 @@ const FeedView = () => {
         </ImageList>
       )}
 
-      <PostModal post={selectedPost} onClose={() => setSelectedPost(null)} />
+     {selectedPost && <PostModal post={selectedPost} onClose={() => setSelectedPost(null)} />}
     </Box>
   );
 };
