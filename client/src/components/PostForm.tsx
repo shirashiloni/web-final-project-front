@@ -8,6 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { usePosts } from '../hooks/usePosts';
 import { uploadImage } from '../hooks/useFiles';
 import { useUser } from '../hooks/useUser';
+import { normalizeImageUrl } from '../utils/imageUtils';
 
 interface PostFormProps {
   existingPost?: {
@@ -40,11 +41,6 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
 
   const [error, setError] = useState('');
   const [isPending, setPending] = useState(false);
-  const normalizeImageUrl = (url?: string) => {
-    if (!url) return undefined;
-    if (url.startsWith('blob:') || url.startsWith('http')) return url;
-    return `/api${url}`;
-  };
 
   const [preview, setPreview] = useState<string | undefined>(
     normalizeImageUrl(existingPost?.imageUrl)
