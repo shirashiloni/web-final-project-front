@@ -21,6 +21,8 @@ export interface IPostUpdate {
 
 export interface PostQuery {
   userId?: string;
+  batches?: number;
+  offset?: number;
 }
 
 export type { Post };
