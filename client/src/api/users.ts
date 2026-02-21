@@ -14,6 +14,11 @@ export const getMyUser = async (): Promise<User> => {
   return response.data;
 };
 
+export const getUserById = async (userId: string): Promise<User> => {
+  const response = await axios.get(`/api/user/${userId}`);
+  return response.data;
+};
+
 export const updateProfileImage = async (userId: string, profileImage: string) => {
   return axios.put(`/api/user/${userId}`, { profileImage });
 };
