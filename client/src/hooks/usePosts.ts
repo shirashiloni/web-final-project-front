@@ -16,13 +16,17 @@ const getPostsByQuery = async (query: PostQuery) => {
     return await getPosts(query);
 }
 
-export function usePosts({ userId, smartSearch }: { userId?: string; smartSearch?: string }) {
+export function usePosts({ userId, smartSearch }: { userId?: string; smartSearch?: string } = {}) {
     const queryClient = useQueryClient();
 
     const postsQuery = { userId: userId ? userId : undefined };
 
+    const queryKey = useMemo(() => {
+        return ['posts', { userId, smartSearch }];
+    }, [userId, smartSearch]);
+
     const { data: results, isLoading, isError } = useQuery({
-        queryKey: ['posts'],
+        queryKey,
         queryFn: () => smartSearch ? getPostsBySmartSearch(smartSearch) : getPostsByQuery(postsQuery),
     });
     const posts = useMemo(() => results?.data || [], [results]);
