@@ -1,22 +1,37 @@
-import React from 'react';
-import PostList from '../components/PostList';
+import React, { useMemo } from 'react';
 import { Box, Button, Typography, Avatar } from '@mui/material';
 import { useLogout } from '../hooks/useAuth';
 import { useUser } from '../hooks/useUser';
-import { getUsersPosts } from '../api/posts';
-import { useQuery } from '@tanstack/react-query';
+import { usePosts } from '../hooks/usePosts';
+import { updateProfileImage } from '../api/users';
+import { uploadImage } from '../hooks/useFiles';
+import { normalizeImageUrl } from '../utils/imageUtils';
+import PostsPreviewGrid from '../components/PostsPreviewGrid';
 
 const ProfileView: React.FC = () => {
   const handleLogout = useLogout();
-  const { user } = useUser();
+  const { user, refeach } = useUser();
+  const { posts } = usePosts({ userId: user?._id });
+  const [imageUrl, setImageUrl] = React.useState(user?.profileImage || '/src/assets/avatar.png');
+  const [uploading, setUploading] = React.useState(false);
 
-  const response = useQuery({
-    queryKey: ['user-posts', user?._id],
-    queryFn: () => getUsersPosts(user!._id),
-    enabled: !!user?._id,
-  });
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !user) return;
+    const file = e.target.files[0];
+    setUploading(true);
+    try {
+      const { url } = await uploadImage(file);
+      await updateProfileImage(user._id, url);
+      setImageUrl(url);
+      refeach();
+    } finally {
+      setUploading(false);
+    }
+  };
 
-  const posts = response.data;
+  const normalImageUrl = useMemo(() => {
+    return normalizeImageUrl(imageUrl);
+  }, [imageUrl]);
 
   return (
     <Box
@@ -35,7 +50,7 @@ const ProfileView: React.FC = () => {
         }}
       >
         <Avatar
-          src="/src/assets/avatar.png"
+          src={normalImageUrl}
           alt="User Avatar"
           sx={{
             width: '200px',
@@ -46,9 +61,17 @@ const ProfileView: React.FC = () => {
         <Typography variant="h6" sx={{ marginBottom: '20px' }}>
           {user!.name}
         </Typography>
+        <input
+          type="file"
+          accept="image/*"
+          style={{ display: 'block', margin: '0 auto 10px auto' }}
+          onChange={handleImageChange}
+          disabled={uploading}
+        />
+        {uploading && <Typography variant="body2">Uploading...</Typography>}
       </Box>
 
-      <PostList posts={posts ? posts : []} isOwner={true} />
+      <PostsPreviewGrid posts={posts ? posts : []} />
 
       <Button variant="contained" color="error" sx={{ marginTop: '20px' }} onClick={handleLogout}>
         Logout

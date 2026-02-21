@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePosts } from '../hooks/usePosts';
+import { useUser } from '../hooks/useUser';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
   Typography,
   CardContent,
@@ -9,69 +10,47 @@ import {
   Card,
   IconButton,
   Stack,
-  Menu,
-  MenuItem,
   Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
 } from '@mui/material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { Post } from '../types/Post';
-import { deletePost } from '../api/posts';
-import PostForm from './PostForm';
+import PostMenu from './PostMenu';
 
 type PostPreviewProps = {
   post: Post;
   isOwner?: boolean;
+  onClick?: () => void;
 };
 
-const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
+const PostPreview = ({ post, onClick }: PostPreviewProps) => {
   const { caption, imageUrl } = post;
   const postId = post._id ?? String(post.id);
+  const commentsCount = post.commentsCount || 0;
 
-  const [likes] = useState(0);
-  const [comments] = useState(0);
+  const { user } = useUser();
+  const [likeCount, setLikeCount] = useState(post.likeCount || 0);
+  const isOwner = user && (post.userId === user._id);
+  const [liked, setLiked] = useState(false);
 
-  // 3-dot menu state
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(anchorEl);
+  const { likeMutation, unlikeMutation, checkUserLiked } = usePosts();
 
-  // Delete confirm dialog state
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  useEffect(() => {
+    if (user && postId) {
+      checkUserLiked(postId, user._id).then(setLiked);
+    }
+  }, [user, postId, checkUserLiked]);
 
-  // Edit mode state
-  const [editOpen, setEditOpen] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deletePost(postId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-posts'] });
-      setDeleteDialogOpen(false);
-    },
-  });
-
-  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-    setAnchorEl(e.currentTarget);
-  };
-
-  const handleMenuClose = () => setAnchorEl(null);
-
-  const handleDeleteClick = () => {
-    handleMenuClose();
-    setDeleteDialogOpen(true);
-  };
-
-  const handleEditClick = () => {
-    handleMenuClose();
-    setEditOpen(true);
+  const onClickLike = async () => {
+    if (!user) return;
+    if (liked) {
+      const res = await unlikeMutation.mutateAsync({ postId, userId: user._id });
+      setLikeCount(res.likeCount);
+      setLiked(false);
+    } else {
+      const res = await likeMutation.mutateAsync({ postId, userId: user._id });
+      setLikeCount(res.likeCount);
+      setLiked(true);
+    }
   };
 
   return (
@@ -86,49 +65,28 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
           border: '1px solid rgba(240, 240, 241, 1)',
           margin: 1,
           position: 'relative',
+          cursor: onClick ? 'pointer' : 'default',
         }}
+        onClick={onClick}
       >
-        {isOwner && (
-          <Box sx={{ position: 'absolute', top: 4, right: 4, zIndex: 2 }}>
-            <IconButton
-              size="small"
-              onClick={handleMenuOpen}
-              sx={{
-                backgroundColor: 'rgba(0,0,0,0.35)',
-                color: 'white',
-                '&:hover': { backgroundColor: 'rgba(0,0,0,0.6)' },
-              }}
-            >
-              <MoreVertIcon fontSize="small" />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={menuOpen}
-              onClose={handleMenuClose}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              <MenuItem onClick={handleEditClick}>Edit</MenuItem>
-              <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
 
+        {isOwner && (<Box sx={{ position: 'absolute', top: 4, right: 4, zIndex: 2 }}>
+          <PostMenu post={post} />
+        </Box>)
+        }
         <CardMedia
           sx={{ width: '100%', aspectRatio: '1' }}
           image={
             imageUrl?.startsWith('blob:') ||
-            imageUrl?.startsWith('http') ||
-            imageUrl?.startsWith('/api')
+              imageUrl?.startsWith('http') ||
+              imageUrl?.startsWith('/api')
               ? imageUrl
               : `/api${imageUrl}`
           }
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            {caption}
+            {caption || 'Post Title'}
           </Typography>
         </CardContent>
         <Stack
@@ -139,52 +97,24 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
           }}
         >
           <Stack direction={'row'} gap={1} alignItems={'center'} margin={1}>
-            <IconButton disabled color="primary">
+            <IconButton
+              color={liked ? 'error' : 'default'}
+              onClick={onClickLike}
+            >
               <FavoriteIcon />
             </IconButton>
-            <Typography variant="body2">{likes}</Typography>
+            <Typography variant="body2">{likeCount}</Typography>
           </Stack>
 
           <Stack direction={'row'} gap={1} alignItems={'center'} margin={1}>
-            <IconButton disabled color="primary">
+            <IconButton color="primary">
               <CommentIcon />
             </IconButton>
-            <Typography variant="body2">{comments}</Typography>
+            <Typography variant="body2">{commentsCount}</Typography>
+
           </Stack>
         </Stack>
-      </Card>
-
-      {/* Delete confirmation dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Post</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this post? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={() => deleteMutation.mutate()}
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Edit post dialog */}
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Edit Post</DialogTitle>
-        <DialogContent sx={{ p: 0 }}>
-          <PostForm
-            existingPost={{ id: postId, caption: caption, imageUrl: imageUrl ?? '' }}
-            onSuccess={() => setEditOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      </Card >
     </>
   );
 };

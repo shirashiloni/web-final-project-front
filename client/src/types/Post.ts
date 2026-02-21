@@ -4,6 +4,8 @@ type Post = {
   userId?: string;
   caption: string;
   imageUrl?: string;
+  likeCount?: number;
+  commentsCount?: number;
 };
 
 export interface IPostCreate {
@@ -15,6 +17,10 @@ export interface IPostCreate {
 export interface IPostUpdate {
   caption?: string;
   imageUrl?: string;
+}
+
+export interface PostQuery {
+  userId?: string;
 }
 
 export type { Post };

@@ -1,15 +1,14 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { Box, Button, TextField, Typography, Stack, IconButton } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
-import { useQueryClient } from '@tanstack/react-query';
 
-import PostPreview from './PostPreview';
-import { createPost, updatePost } from '../api/posts';
+import { usePosts } from '../hooks/usePosts';
 import { uploadImage } from '../hooks/useFiles';
 import { useUser } from '../hooks/useUser';
+import { normalizeImageUrl } from '../utils/imageUtils';
 
 interface PostFormProps {
   existingPost?: {
@@ -23,7 +22,8 @@ interface PostFormProps {
 const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const queryClient = useQueryClient();
+
+  const { createMutation, updateMutation } = usePosts();
 
   const defaultValues = existingPost
     ? { caption: existingPost.caption, img: undefined }
@@ -34,24 +34,17 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
+    
   } = useForm({
     defaultValues,
   });
 
-  const watchedCaption = watch('caption');
   const [error, setError] = useState('');
   const [isPending, setPending] = useState(false);
-  const normalizeImageUrl = (url?: string) => {
-    if (!url) return undefined;
-    if (url.startsWith('blob:') || url.startsWith('http')) return url;
-    return `/api${url}`;
-  };
 
   const [preview, setPreview] = useState<string | undefined>(
     normalizeImageUrl(existingPost?.imageUrl)
   );
-  const [isDragOver, setIsDragOver] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,28 +57,19 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent, onChange: (value: File) => void) => {
     e.preventDefault();
-    setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       handleImageChange(file, onChange);
     }
   };
-
-  const previewPost = useMemo(() => {
-    return {
-      caption: watchedCaption || 'Post Title',
-    };
-  }, [watchedCaption]);
 
   const onSubmit = async (data: { caption?: string; img?: File }) => {
     setError('');
@@ -98,11 +82,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
           const uploadImageData = await uploadImage(data.img);
           imageUrl = uploadImageData.url;
         }
-        await updatePost(existingPost.id, {
-          caption: data.caption,
-          imageUrl,
-        });
-        queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+        await updateMutation.mutateAsync({ postId: existingPost.id, data: { caption: data.caption, imageUrl } });
         setPending(false);
         reset();
         if (onSuccess) {
@@ -110,12 +90,11 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
         }
       } else if (user) {
         const uploadImageData = await uploadImage(data.img!);
-        await createPost({
+        await createMutation.mutateAsync({
           userId: user._id,
           caption: data.caption || '',
           imageUrl: uploadImageData.url,
         });
-        queryClient.invalidateQueries({ queryKey: ['user-posts'] });
         setPending(false);
         reset();
         navigate('/explore');
@@ -252,18 +231,6 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
               {existingPost ? 'Save Changes' : 'Upload Post'}
             </Button>
           )}
-        </Box>
-        <Box sx={{ flex: 1, maxWidth: 400 }}>
-          <Typography variant="h5" gutterBottom>
-            Post Preview
-          </Typography>
-          <PostPreview
-            post={{
-              ...previewPost,
-              imageUrl: preview || '',
-              id: 0,
-            }}
-          />
         </Box>
       </Stack>
     </>

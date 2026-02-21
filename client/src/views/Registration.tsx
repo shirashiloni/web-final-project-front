@@ -12,12 +12,14 @@ interface RegistrationFormInputs {
   name: string;
   email: string;
   password: string;
+  userId: string;
 }
 
 const registrationSchema = yup.object().shape({
   name: yup.string().required('Name is required'),
   email: yup.string().email('Must be a valid email').required('Email is required'),
   password: yup.string().required('Password is required'),
+  userId: yup.string().required('User ID is required'),
 });
 
 const Register: React.FC = () => {
@@ -46,7 +48,7 @@ const Register: React.FC = () => {
 
       const user = await getMyUser();
       setUser(user);
-      navigate('/feed');
+      navigate('/explore');
     } catch (error) {
       console.error(error);
       setErrorMessage('Registration failed. Please try again.');
@@ -103,6 +105,15 @@ const Register: React.FC = () => {
             {...register('password')}
             error={!!errors.password}
             helperText={errors.password?.message}
+          />
+          <TextField
+            label="User ID"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            {...register('userId')}
+            error={!!errors.userId}
+            helperText={errors.userId?.message}
           />
           <Button
             type="submit"

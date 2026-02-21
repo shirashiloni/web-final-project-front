@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { IPostCreate, IPostUpdate, Post } from '../types/Post';
+import type { IPostCreate, IPostUpdate, Post, PostQuery } from '../types/Post';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -10,17 +10,17 @@ axios.interceptors.request.use((config) => {
 });
 
 export const createPost = async (data: IPostCreate) => {
-  const response = await axios.post('/api/post/', data);
+  const response = await axios.post('/api/post', data);
   return response.data;
 };
 
-export const getPosts = async (): Promise<{ data: Post[] }> => {
-  const response = await axios.get('/api/post/');
+export const getPosts = async (query: PostQuery): Promise<{ data: Post[] }> => {
+  const response = await axios.get('/api/post', { params: query });
   return response.data;
 };
 
-export const getUsersPosts = async (userId: string): Promise<Post[]> => {
-  const response = await axios.get(`/api/post/user/${userId}`);
+export const getPostsBySmartSearch = async (searchText: string): Promise<{ data: Post[] }> => {
+  const response = await axios.get('/api/post/search', { params: { q: searchText } });
   return response.data;
 };
 
@@ -32,3 +32,19 @@ export const updatePost = async (postId: string, data: IPostUpdate): Promise<Pos
   const response = await axios.put(`/api/post/${postId}`, data);
   return response.data;
 };
+
+export const likePost = async (postId: string, userId: string): Promise<{ likeCount: number }> => {
+  const response = await axios.post(`/api/post/${postId}/like`, { userId });
+  return response.data;
+};
+
+export const unlikePost = async (postId: string, userId: string): Promise<{ likeCount: number }> => {
+  const response = await axios.post(`/api/post/${postId}/unlike`, { userId });
+  return response.data;
+};
+
+export const getUserLikeStatus = async (postId: string, userId: string): Promise<{ liked: boolean }> => {
+  const response = await axios.get(`/api/like/status?postId=${postId}&userId=${userId}`);
+  return response.data;
+};
+

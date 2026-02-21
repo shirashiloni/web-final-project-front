@@ -45,7 +45,7 @@ const Login: React.FC = () => {
 
       const user = await getMyUser();
       setUser(user);
-      navigate('/feed');
+      navigate('/explore');
     } catch (error) {
       console.error(error);
       setErrorMessage('Invalid email or password. Please try again.');
@@ -55,7 +55,7 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user) navigate('/feed');
+    if (user) navigate('/explore');
   }, [navigate, user]);
 
   return (
