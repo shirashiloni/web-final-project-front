@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { usePosts } from '../hooks/usePosts';
 import CommentsSection from './CommentsSection';
 import { useUser } from '../hooks/useUser';
+import PostMenu from './PostMenu';
 
 type PostModalProps = {
   post: Post;
@@ -20,6 +21,7 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
   const { likeMutation, unlikeMutation, checkUserLiked } = usePosts();
   const postId = post._id ?? String(post.id);
   const commentsCount = post.commentsCount || 0;
+  const isOwner = user && (post.userId === user._id);
 
   useEffect(() => {
     if (user && postId) {
@@ -42,7 +44,12 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
   return (
     <Dialog open={!!post} onClose={onClose} maxWidth="sm" fullWidth>
       <Box sx={{ position: 'relative' }}>
-        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
+        {isOwner && (
+          <Box sx={{ position: 'absolute', top: 4, right: 4, zIndex: 2 }}>
+          <PostMenu post={post} />
+        </Box>)
+        }
+        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}>
           <CloseIcon />
         </IconButton>
 

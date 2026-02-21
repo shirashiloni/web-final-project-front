@@ -10,7 +10,7 @@ interface PostListProps {
   isOwner?: boolean;
 }
 
-const PostList = ({ posts, isOwner = false }: PostListProps) => {
+const PostList = ({ posts }: PostListProps) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   
   return (
@@ -20,7 +20,6 @@ const PostList = ({ posts, isOwner = false }: PostListProps) => {
           <PostPreview
             key={post._id ?? post.id}
             post={post}
-            isOwner={isOwner}
             onClick={() => setSelectedPost(post)}
           />
         ))}

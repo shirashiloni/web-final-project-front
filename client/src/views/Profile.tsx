@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import PostList from '../components/PostList';
 import { Box, Button, Typography, Avatar } from '@mui/material';
 import { useLogout } from '../hooks/useAuth';
 import { useUser } from '../hooks/useUser';
@@ -7,6 +6,7 @@ import { usePosts } from '../hooks/usePosts';
 import { updateProfileImage } from '../api/users';
 import { uploadImage } from '../hooks/useFiles';
 import { normalizeImageUrl } from '../utils/imageUtils';
+import PostsPreviewGrid from '../components/PostsPreviewGrid';
 
 const ProfileView: React.FC = () => {
   const handleLogout = useLogout();
@@ -71,7 +71,7 @@ const ProfileView: React.FC = () => {
         {uploading && <Typography variant="body2">Uploading...</Typography>}
       </Box>
 
-      <PostList posts={posts ? posts : []} isOwner={true} />
+      <PostsPreviewGrid posts={posts ? posts : []} />
 
       <Button variant="contained" color="error" sx={{ marginTop: '20px' }} onClick={handleLogout}>
         Logout
