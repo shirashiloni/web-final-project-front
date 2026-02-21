@@ -1,19 +1,13 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Box, CircularProgress, Typography, ImageList, ImageListItem } from '@mui/material';
-import { getPosts } from '../api/posts';
 import PostModal from '../components/PostModal';
 import type { Post } from '../types/Post';
+import { usePosts } from '../hooks/usePosts';
 
 const FeedView = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['posts'],
-    queryFn: () => getPosts(),
-  });
-
-  const posts = data?.data ?? [];
+  const { posts, isLoading, isError } = usePosts();
 
   if (isLoading) {
     return (

@@ -18,4 +18,8 @@ export interface IPostUpdate {
   imageUrl?: string;
 }
 
+export interface PostQuery {
+  userId?: string;
+}
+
 export type { Post };

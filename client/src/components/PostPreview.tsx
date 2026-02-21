@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { likePost, unlikePost } from '../api/posts';
+import { usePosts } from '../hooks/usePosts';
 import { useUser } from '../hooks/useUser';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -21,10 +21,8 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { Post } from '../types/Post';
-import { deletePost } from '../api/posts';
 import PostForm from './PostForm';
 
 type PostPreviewProps = {
@@ -50,15 +48,7 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
   // Edit mode state
   const [editOpen, setEditOpen] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deletePost(postId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-posts'] });
-      setDeleteDialogOpen(false);
-    },
-  });
+  const { likeMutation, unlikeMutation, deleteMutation } = usePosts();
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -80,15 +70,15 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
   const onClickLike = async () => {
     if (!user) return;
     if (liked) {
-      const res = await unlikePost(postId, user._id);
+      const res = await unlikeMutation.mutateAsync({ postId, userId: user._id });
       setLikeCount(res.likeCount);
       setLiked(false);
     } else {
-      const res = await likePost(postId, user._id);
+      const res = await likeMutation.mutateAsync({ postId, userId: user._id });
       setLikeCount(res.likeCount);
       setLiked(true);
     }
-  }
+  };
 
   return (
     <>
@@ -186,7 +176,10 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
           <Button
             color="error"
             variant="contained"
-            onClick={() => deleteMutation.mutate()}
+            onClick={async () => {
+              await deleteMutation.mutateAsync(postId);
+              setDeleteDialogOpen(false);
+            }}
             disabled={deleteMutation.isPending}
           >
             {deleteMutation.isPending ? 'Deleting...' : 'Delete'}

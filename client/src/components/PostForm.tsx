@@ -4,9 +4,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { Box, Button, TextField, Typography, Stack, IconButton } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
-import { useQueryClient } from '@tanstack/react-query';
 
-import { createPost, updatePost } from '../api/posts';
+import { usePosts } from '../hooks/usePosts';
 import { uploadImage } from '../hooks/useFiles';
 import { useUser } from '../hooks/useUser';
 
@@ -22,7 +21,8 @@ interface PostFormProps {
 const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const queryClient = useQueryClient();
+
+  const { createMutation, updateMutation } = usePosts();
 
   const defaultValues = existingPost
     ? { caption: existingPost.caption, img: undefined }
@@ -86,11 +86,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
           const uploadImageData = await uploadImage(data.img);
           imageUrl = uploadImageData.url;
         }
-        await updatePost(existingPost.id, {
-          caption: data.caption,
-          imageUrl,
-        });
-        queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+        await updateMutation.mutateAsync({ postId: existingPost.id, data: { caption: data.caption, imageUrl } });
         setPending(false);
         reset();
         if (onSuccess) {
@@ -98,12 +94,11 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
         }
       } else if (user) {
         const uploadImageData = await uploadImage(data.img!);
-        await createPost({
+        await createMutation.mutateAsync({
           userId: user._id,
           caption: data.caption || '',
           imageUrl: uploadImageData.url,
         });
-        queryClient.invalidateQueries({ queryKey: ['user-posts'] });
         setPending(false);
         reset();
         navigate('/explore');

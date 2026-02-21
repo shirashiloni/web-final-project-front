@@ -4,7 +4,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
 import type { Post } from '../types/Post';
 import { useState } from 'react';
-import { likePost, unlikePost } from '../api/posts';
+import { usePosts } from '../hooks/usePosts';
 import { useUser } from '../hooks/useUser';
 
 type PostModalProps = {
@@ -16,22 +16,22 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
   const { user } = useUser();
   const [likeCount, setLikeCount] = useState(post?.likeCount || 0);
   const [liked, setLiked] = useState(false);
+  const { likeMutation, unlikeMutation } = usePosts();
   if (!post) return null;
-
   const postId = post._id ?? String(post.id);
 
   const onClickLike = async () => {
     if (!user) return;
     if (liked) {
-      const res = await unlikePost(postId, user._id);
+      const res = await unlikeMutation.mutateAsync({ postId, userId: user._id });
       setLikeCount(res.likeCount);
       setLiked(false);
     } else {
-      const res = await likePost(postId, user._id);
+      const res = await likeMutation.mutateAsync({ postId, userId: user._id });
       setLikeCount(res.likeCount);
       setLiked(true);
     }
-  }
+  };
 
   return (
     <Dialog open={!!post} onClose={onClose} maxWidth="sm" fullWidth>

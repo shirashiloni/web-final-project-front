@@ -3,20 +3,12 @@ import PostList from '../components/PostList';
 import { Box, Button, Typography, Avatar } from '@mui/material';
 import { useLogout } from '../hooks/useAuth';
 import { useUser } from '../hooks/useUser';
-import { getUsersPosts } from '../api/posts';
-import { useQuery } from '@tanstack/react-query';
+import { usePosts } from '../hooks/usePosts';
 
 const ProfileView: React.FC = () => {
   const handleLogout = useLogout();
   const { user } = useUser();
-
-  const response = useQuery({
-    queryKey: ['user-posts', user?._id],
-    queryFn: () => getUsersPosts(user!._id),
-    enabled: !!user?._id,
-  });
-
-  const posts = response.data;
+  const { posts } = usePosts(user?._id);
 
   return (
     <Box

@@ -11,17 +11,23 @@ export const useUser = () => {
 
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) return;
+      try{
 
-      setIsLoading(true);
-      const user = await getMyUser();
-
-      if (user) {
-        setUser(user);
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
+        
+        setIsLoading(true);
+        const user = await getMyUser();
+        
+        if (user) {
+          setUser(user);
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to load user:', error);
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     loadUser();

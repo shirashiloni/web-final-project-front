@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { IPostCreate, IPostUpdate, Post } from '../types/Post';
+import type { IPostCreate, IPostUpdate, Post, PostQuery } from '../types/Post';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -10,17 +10,12 @@ axios.interceptors.request.use((config) => {
 });
 
 export const createPost = async (data: IPostCreate) => {
-  const response = await axios.post('/api/post/', data);
+  const response = await axios.post('/api/post', data);
   return response.data;
 };
 
-export const getPosts = async (): Promise<{ data: Post[] }> => {
-  const response = await axios.get('/api/post/');
-  return response.data;
-};
-
-export const getUsersPosts = async (userId: string): Promise<Post[]> => {
-  const response = await axios.get(`/api/post/user/${userId}`);
+export const getPosts = async (query: PostQuery): Promise<{ data: Post[] }> => {
+  const response = await axios.get('/api/post', { params: query });
   return response.data;
 };
 
