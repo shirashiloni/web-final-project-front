@@ -128,7 +128,7 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            {caption}
+            {caption || 'Post Title'}
           </Typography>
         </CardContent>
         <Stack

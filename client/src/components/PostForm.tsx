@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { Box, Button, TextField, Typography, Stack, IconButton } from '@mui/material';
@@ -6,7 +6,6 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import { useQueryClient } from '@tanstack/react-query';
 
-import PostPreview from './PostPreview';
 import { createPost, updatePost } from '../api/posts';
 import { uploadImage } from '../hooks/useFiles';
 import { useUser } from '../hooks/useUser';
@@ -34,12 +33,11 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
+    
   } = useForm({
     defaultValues,
   });
 
-  const watchedCaption = watch('caption');
   const [error, setError] = useState('');
   const [isPending, setPending] = useState(false);
   const normalizeImageUrl = (url?: string) => {
@@ -51,7 +49,6 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
   const [preview, setPreview] = useState<string | undefined>(
     normalizeImageUrl(existingPost?.imageUrl)
   );
-  const [isDragOver, setIsDragOver] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,28 +61,19 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent, onChange: (value: File) => void) => {
     e.preventDefault();
-    setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       handleImageChange(file, onChange);
     }
   };
-
-  const previewPost = useMemo(() => {
-    return {
-      caption: watchedCaption || 'Post Title',
-    };
-  }, [watchedCaption]);
 
   const onSubmit = async (data: { caption?: string; img?: File }) => {
     setError('');
@@ -252,18 +240,6 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost, onSuccess }) => {
               {existingPost ? 'Save Changes' : 'Upload Post'}
             </Button>
           )}
-        </Box>
-        <Box sx={{ flex: 1, maxWidth: 400 }}>
-          <Typography variant="h5" gutterBottom>
-            Post Preview
-          </Typography>
-          <PostPreview
-            post={{
-              ...previewPost,
-              imageUrl: preview || '',
-              id: 0,
-            }}
-          />
         </Box>
       </Stack>
     </>
