@@ -19,6 +19,11 @@ export const getPosts = async (query: PostQuery): Promise<{ data: Post[] }> => {
   return response.data;
 };
 
+export const getPostsBySmartSearch = async (searchText: string): Promise<{ data: Post[] }> => {
+  const response = await axios.get('/api/post/search', { params: { q: searchText } });
+  return response.data;
+};
+
 export const deletePost = async (postId: string): Promise<void> => {
   await axios.delete(`/api/post/${postId}`);
 };

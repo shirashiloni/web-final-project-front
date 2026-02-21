@@ -11,7 +11,7 @@ import PostsPreviewGrid from '../components/PostsPreviewGrid';
 const ProfileView: React.FC = () => {
   const handleLogout = useLogout();
   const { user, refeach } = useUser();
-  const { posts } = usePosts(user?._id);
+  const { posts } = usePosts({ userId: user?._id });
   const [imageUrl, setImageUrl] = React.useState(user?.profileImage || '/src/assets/avatar.png');
   const [uploading, setUploading] = React.useState(false);
 

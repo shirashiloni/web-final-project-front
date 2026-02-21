@@ -7,6 +7,7 @@ import {
     likePost,
     unlikePost,
     getUserLikeStatus,
+    getPostsBySmartSearch,
 } from '../api/posts';
 import type { IPostCreate, IPostUpdate, PostQuery } from '../types/Post';
 import { useMemo } from 'react';
@@ -15,14 +16,14 @@ const getPostsByQuery = async (query: PostQuery) => {
     return await getPosts(query);
 }
 
-export function usePosts(userId?: string) {
+export function usePosts({ userId, smartSearch }: { userId?: string; smartSearch?: string }) {
     const queryClient = useQueryClient();
 
     const postsQuery = { userId: userId ? userId : undefined };
 
     const { data: results, isLoading, isError } = useQuery({
         queryKey: ['posts'],
-        queryFn: () => getPostsByQuery(postsQuery),
+        queryFn: () => smartSearch ? getPostsBySmartSearch(smartSearch) : getPostsByQuery(postsQuery),
     });
     const posts = useMemo(() => results?.data || [], [results]);
 
