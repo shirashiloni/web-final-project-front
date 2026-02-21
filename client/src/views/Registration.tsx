@@ -46,7 +46,7 @@ const Register: React.FC = () => {
 
       const user = await getMyUser();
       setUser(user);
-      navigate('/feed');
+      navigate('/explore');
     } catch (error) {
       console.error(error);
       setErrorMessage('Registration failed. Please try again.');
