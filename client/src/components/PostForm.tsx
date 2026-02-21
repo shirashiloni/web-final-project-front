@@ -49,7 +49,6 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
   const [error, setError] = useState('');
   const [isPending, setPending] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(existingPost?.imageUrl);
-  const [useAISuggestion, setUseAISuggestion] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -94,13 +93,14 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
     try {
       if (existingPost) {
         // await updatePost({ postId: existingPost.id, post: { content: data.content, title: data.title }, img: data.img });
-      } else if (user && data.caption) {
+      } else if (user) {
         setPending(true);
         const uploadImageData = await uploadImage(data.img!);
 
         await createPost({
-          user: user.email,
-          caption: data.caption,
+          userId: user._id,
+          caption: data.caption || '',
+
           imageUrl: uploadImageData.url,
         });
       }
@@ -162,7 +162,7 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
                 />
 
                 {preview ? (
-                  <Box>
+                  <Box sx={{ position: 'relative', display: 'inline-block', marginTop: 5 }}>
                     <IconButton
                       size="small"
                       onClick={(e) => {
@@ -174,8 +174,10 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
                         }
                       }}
                       sx={{
-                        top: 55,
-                        left: 5,
+                        position: 'absolute',
+                        top: 10,
+                        left: 10,
+                        zIndex: 1,
                         backgroundColor: 'rgba(0,0,0,0.5)',
                         color: 'white',
                         '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
@@ -189,8 +191,9 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
                       style={{
                         width: 400,
                         height: 250,
-                        objectFit: 'contain',
+                        objectFit: 'cover',
                         borderRadius: '8px',
+                        display: 'block',
                       }}
                     />
                   </Box>
@@ -212,43 +215,21 @@ const PostForm: React.FC<PostFormProps> = ({ existingPost }) => {
               </Box>
             )}
           />
-          {!existingPost && (
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={useAISuggestion}
-                    onChange={(e) => setUseAISuggestion(e.target.checked)}
-                  />
-                }
-                label="Use AI Suggestions"
+          <Controller
+            name="caption"
+            control={control}
+            rules={{ required: 'Caption is required' }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Caption"
+                variant="outlined"
+                fullWidth
+                error={!!errors.caption}
+                helperText={errors.caption ? errors.caption.message : ' '}
               />
-              <Typography
-                variant="caption"
-                display="block"
-                sx={{ color: 'text.secondary', mt: -1, ml: 4 }}
-              >
-                Automatically generate a caption using AI
-              </Typography>
-            </Box>
-          )}
-          {!useAISuggestion && (
-            <Controller
-              name="caption"
-              control={control}
-              rules={{ required: 'Caption is required' }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Caption"
-                  variant="outlined"
-                  fullWidth
-                  error={!!errors.caption}
-                  helperText={errors.caption ? errors.caption.message : ' '}
-                />
-              )}
-            />
-          )}
+            )}
+          />
           {isPending ? (
             <Typography>Uploading...</Typography>
           ) : (

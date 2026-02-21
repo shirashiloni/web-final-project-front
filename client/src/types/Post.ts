@@ -7,6 +7,6 @@ type Post = {
 export interface IPostCreate {
   caption: string;
   imageUrl: string;
-  user: string
+  userId: string
 }
 export type { Post };

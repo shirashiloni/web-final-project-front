@@ -3,7 +3,7 @@ import PostList from '../components/PostList';
 import { Box, Button, Typography, Avatar } from '@mui/material';
 import { useLogout } from '../hooks/useAuth';
 import { useUser } from '../hooks/useUser';
-import { getPosts } from '../api/posts';
+import { getUsersPosts } from '../api/posts';
 import { useQuery } from '@tanstack/react-query';
 
 const ProfileView: React.FC = () => {
@@ -11,11 +11,12 @@ const ProfileView: React.FC = () => {
   const { user } = useUser();
 
   const response = useQuery({
-    queryKey: ['posts'],
-    queryFn: () => getPosts(),
+    queryKey: ['user-posts', user?._id],
+    queryFn: () => getUsersPosts(user!._id),
+    enabled: !!user?._id,
   });
 
-  const posts = response.data?.data;
+  const posts = response.data;
 
   return (
     <Box
