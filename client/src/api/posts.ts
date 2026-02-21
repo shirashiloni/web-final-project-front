@@ -32,3 +32,14 @@ export const updatePost = async (postId: string, data: IPostUpdate): Promise<Pos
   const response = await axios.put(`/api/post/${postId}`, data);
   return response.data;
 };
+
+export const likePost = async (postId: string, userId: string): Promise<{ likeCount: number }> => {
+  const response = await axios.post(`/api/post/${postId}/like`, { userId });
+  return response.data;
+};
+
+export const unlikePost = async (postId: string, userId: string): Promise<{ likeCount: number }> => {
+  const response = await axios.post(`/api/post/${postId}/unlike`, { userId });
+  return response.data;
+};
+

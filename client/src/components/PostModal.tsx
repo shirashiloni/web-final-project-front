@@ -3,6 +3,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
 import type { Post } from '../types/Post';
+import { useState } from 'react';
+import { likePost, unlikePost } from '../api/posts';
+import { useUser } from '../hooks/useUser';
 
 type PostModalProps = {
   post: Post | null;
@@ -10,7 +13,25 @@ type PostModalProps = {
 };
 
 const PostModal = ({ post, onClose }: PostModalProps) => {
+  const { user } = useUser();
+  const [likeCount, setLikeCount] = useState(post?.likeCount || 0);
+  const [liked, setLiked] = useState(false);
   if (!post) return null;
+
+  const postId = post._id ?? String(post.id);
+
+  const onClickLike = async () => {
+    if (!user) return;
+    if (liked) {
+      const res = await unlikePost(postId, user._id);
+      setLikeCount(res.likeCount);
+      setLiked(false);
+    } else {
+      const res = await likePost(postId, user._id);
+      setLikeCount(res.likeCount);
+      setLiked(true);
+    }
+  }
 
   return (
     <Dialog open={!!post} onClose={onClose} maxWidth="sm" fullWidth>
@@ -37,13 +58,17 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
 
           <Stack direction="row" gap={2} alignItems="center">
             <Stack direction="row" gap={0.5} alignItems="center">
-              <IconButton disabled color="primary" size="small">
+              <IconButton
+                color={liked ? "error" : "default"}
+                size="small"
+                onClick={onClickLike}
+              >
                 <FavoriteIcon fontSize="small" />
               </IconButton>
-              <Typography variant="body2">0</Typography>
+              <Typography variant="body2">{likeCount}</Typography>
             </Stack>
             <Stack direction="row" gap={0.5} alignItems="center">
-              <IconButton disabled color="primary" size="small">
+              <IconButton disabled color="default" size="small">
                 <CommentIcon fontSize="small" />
               </IconButton>
               <Typography variant="body2">0</Typography>

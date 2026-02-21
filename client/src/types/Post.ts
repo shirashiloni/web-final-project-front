@@ -4,6 +4,7 @@ type Post = {
   userId?: string;
   caption: string;
   imageUrl?: string;
+  likeCount?: number;
 };
 
 export interface IPostCreate {

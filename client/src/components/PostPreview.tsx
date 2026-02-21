@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { likePost, unlikePost } from '../api/posts';
+import { useUser } from '../hooks/useUser';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -34,10 +36,11 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
   const { caption, imageUrl } = post;
   const postId = post._id ?? String(post.id);
 
-  const [likes] = useState(0);
+  const { user } = useUser();
+  const [likeCount, setLikeCount] = useState(post.likeCount || 0);
   const [comments] = useState(0);
+  const [liked, setLiked] = useState(false);
 
-  // 3-dot menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
@@ -73,6 +76,19 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
     handleMenuClose();
     setEditOpen(true);
   };
+
+  const onClickLike = async () => {
+    if (!user) return;
+    if (liked) {
+      const res = await unlikePost(postId, user._id);
+      setLikeCount(res.likeCount);
+      setLiked(false);
+    } else {
+      const res = await likePost(postId, user._id);
+      setLikeCount(res.likeCount);
+      setLiked(true);
+    }
+  }
 
   return (
     <>
@@ -120,8 +136,8 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
           sx={{ width: '100%', aspectRatio: '1' }}
           image={
             imageUrl?.startsWith('blob:') ||
-            imageUrl?.startsWith('http') ||
-            imageUrl?.startsWith('/api')
+              imageUrl?.startsWith('http') ||
+              imageUrl?.startsWith('/api')
               ? imageUrl
               : `/api${imageUrl}`
           }
@@ -139,10 +155,13 @@ const PostPreview = ({ post, isOwner = false }: PostPreviewProps) => {
           }}
         >
           <Stack direction={'row'} gap={1} alignItems={'center'} margin={1}>
-            <IconButton disabled color="primary">
+            <IconButton
+              color={liked ? 'error' : 'default'}
+              onClick={onClickLike}
+            >
               <FavoriteIcon />
             </IconButton>
-            <Typography variant="body2">{likes}</Typography>
+            <Typography variant="body2">{likeCount}</Typography>
           </Stack>
 
           <Stack direction={'row'} gap={1} alignItems={'center'} margin={1}>
