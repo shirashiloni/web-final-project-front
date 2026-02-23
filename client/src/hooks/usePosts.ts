@@ -37,12 +37,12 @@ export function usePosts({ userId, smartSearch }: { userId?: string; smartSearch
     queryFn: ({ pageParam }) =>
       smartSearch
         ? getPostsBySmartSearch(smartSearch)
-        : getPostsByQuery({ ...postsQuery, batches: 3, offset: pageParam }),
+        : getPostsByQuery({ ...postsQuery, batches: 10, offset: pageParam }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       if (smartSearch) return undefined;
-      if (lastPage.data.length < 3) return undefined;
-      return lastPageParam + 3;
+      if (lastPage.data.length < 10) return undefined;
+      return lastPageParam + 10;
     },
   });
   const posts = useMemo(() => results?.pages.flatMap((p) => p.data) || [], [results]);
