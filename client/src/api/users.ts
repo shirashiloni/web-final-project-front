@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { User } from '../types/User';
 
 axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -10,7 +10,7 @@ axios.interceptors.request.use((config) => {
 });
 
 export const getMyUser = async (): Promise<User> => {
-  const response = await axios.get("/api/user/me");
+  const response = await axios.get('/api/user/me');
   return response.data;
 };
 
@@ -19,6 +19,9 @@ export const getUserById = async (userId: string): Promise<User> => {
   return response.data;
 };
 
-export const updateProfileImage = async (userId: string, profileImage: string) => {
-  return axios.put(`/api/user/${userId}`, { profileImage });
+export const updateUser = async (
+  userId: string,
+  data: { name?: string; profileImage?: string }
+) => {
+  return axios.put(`/api/user/${userId}`, data);
 };
