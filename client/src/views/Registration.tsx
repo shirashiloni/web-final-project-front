@@ -42,8 +42,8 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { token, refreshToken } = await registerUser(data);
-      localStorage.setItem('accessToken', token);
+      const { refreshToken } = await registerUser(data);
+      
       localStorage.setItem('refreshToken', refreshToken);
 
       const user = await getMyUser();

@@ -9,7 +9,7 @@ export const useUser = () => {
   const [user, setUser] = useAtom(userAtom);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refeach = useCallback(async () => {
+  const refeachUser = useCallback(async () => {
     try {
       setIsLoading(true);
       const user = await getMyUser();
@@ -19,6 +19,7 @@ export const useUser = () => {
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to refeach user:', error);
+      setUser(null);
       setIsLoading(false);
     }
   }, [setUser]);
@@ -26,11 +27,16 @@ export const useUser = () => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-
-        const token = localStorage.getItem('accessToken');
-        if (!token) return;
-
         setIsLoading(true);
+
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        if (!refreshToken) {
+          setIsLoading(false);
+          setUser(null);
+          return;
+        }
+        
         const user = await getMyUser();
 
         if (user) {
@@ -40,6 +46,7 @@ export const useUser = () => {
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to load user:', error);
+        setUser(null);
         setIsLoading(false);
       }
     };
@@ -47,5 +54,5 @@ export const useUser = () => {
     loadUser();
   }, [setUser]);
 
-  return { user, isLoading, setUser, refeach };
+  return { user, isLoading, setUser, refeach: refeachUser };
 };

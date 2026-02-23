@@ -5,8 +5,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
-import { loginUser } from '../api/auth';
+import { loginUser, loginWithGoogle } from '../api/auth';
 import { getMyUser } from '../api/users';
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 
 interface LoginFormInputs {
   email: string;
@@ -38,9 +39,8 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { token, refreshToken } = await loginUser(data);
+      const { refreshToken } = await loginUser(data);
 
-      localStorage.setItem('accessToken', token);
       localStorage.setItem('refreshToken', refreshToken);
 
       const user = await getMyUser();
@@ -58,6 +58,22 @@ const Login: React.FC = () => {
     if (user) navigate('/explore');
   }, [navigate, user]);
 
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    setErrorMessage(null);
+    setIsLoading(true);
+    try {
+      const { refreshToken } = await loginWithGoogle({ credential: credentialResponse.credential });
+      localStorage.setItem('refreshToken', refreshToken);
+      const user = await getMyUser();
+      setUser(user);
+      navigate('/explore');
+    } catch {
+      setErrorMessage('Google login failed.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -68,7 +84,7 @@ const Login: React.FC = () => {
         p: 2,
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
+      <Box sx={{ width: '100%', maxWidth: 400, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography variant="h4" gutterBottom>
           Login
         </Typography>
@@ -106,6 +122,16 @@ const Login: React.FC = () => {
           >
             {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
           </Button>
+          <Typography color="black" variant="body2" sx={{ mt: 2 }}>
+            Or
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', my: 2 }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setErrorMessage('Google login failed.')}
+              useOneTap
+            />
+          </Box>
         </form>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
