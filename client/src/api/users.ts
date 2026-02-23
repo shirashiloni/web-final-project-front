@@ -11,6 +11,9 @@ export const getUserById = async (userId: string): Promise<User> => {
   return response.data;
 };
 
-export const updateProfileImage = async (userId: string, profileImage: string) => {
-  return axiosInstance.put(`/api/user/${userId}`, { profileImage });
-};
+export const updateUser = async (
+  userId: string,
+  data: { name?: string; profileImage?: string }
+) => {
+  return axiosInstance.put(`/api/user/${userId}`, data);
+}
