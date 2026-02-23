@@ -38,9 +38,8 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { token, refreshToken } = await loginUser(data);
+      const { refreshToken } = await loginUser(data);
 
-      localStorage.setItem('accessToken', token);
       localStorage.setItem('refreshToken', refreshToken);
 
       const user = await getMyUser();
