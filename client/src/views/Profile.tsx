@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Box, Button, Typography, Avatar } from '@mui/material';
+import React, { useMemo, useEffect } from 'react';
+import { Box, Button, Typography, Avatar, CircularProgress } from '@mui/material';
 import { useLogout } from '../hooks/useAuth';
 import { useUser } from '../hooks/useUser';
 import { usePosts } from '../hooks/usePosts';
@@ -11,7 +11,7 @@ import PostsPreviewGrid from '../components/PostsPreviewGrid';
 const ProfileView: React.FC = () => {
   const handleLogout = useLogout();
   const { user, refeach } = useUser();
-  const { posts } = usePosts({ userId: user?._id });
+  const { posts, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts({ userId: user?._id });
   const [imageUrl, setImageUrl] = React.useState(user?.profileImage || '/src/assets/avatar.png');
   const [uploading, setUploading] = React.useState(false);
 
@@ -32,6 +32,23 @@ const ProfileView: React.FC = () => {
   const normalImageUrl = useMemo(() => {
     return normalizeImageUrl(imageUrl);
   }, [imageUrl]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = document.documentElement.scrollTop;
+      const clientHeight = document.documentElement.clientHeight;
+
+      if (scrollHeight > clientHeight && scrollHeight - scrollTop <= clientHeight + 100) {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <Box
@@ -72,6 +89,11 @@ const ProfileView: React.FC = () => {
       </Box>
 
       <PostsPreviewGrid posts={posts ? posts : []} />
+      {isFetchingNextPage && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
+          <CircularProgress size={30} />
+        </Box>
+      )}
 
       <Button variant="contained" color="error" sx={{ marginTop: '20px' }} onClick={handleLogout}>
         Logout
