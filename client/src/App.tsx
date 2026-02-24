@@ -20,6 +20,7 @@ const App = () => {
         <Route index path="/login" element={<LoginView />} />
         <Route path="/register" element={<RegistrationView />} />
         <Route element={<ProtectedRoute />}>
+          <Route path="/"/>
           <Route path="/explore" element={<FeedView />} />
           <Route path="/profile" element={<ProfileView />} />
           <Route path="/post" element={<ShareView />} />
