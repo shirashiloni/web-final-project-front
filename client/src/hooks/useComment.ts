@@ -18,12 +18,18 @@ export function useComment(postId: string) {
 
     const createCommentMutation = useMutation({
         mutationFn: ({ content }: { content: string }) => createComment(postId, content, user!._id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comments', postId] }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+        },
     });
 
     const deleteCommentMutation = useMutation({
         mutationFn: (commentId: string) => deleteComment(commentId),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comments', postId] }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+        },
     });
 
     return {
