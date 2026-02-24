@@ -1,7 +1,7 @@
 import type { Comment } from '../types/Comment';
 import axiosInstance from '../utils/http';
 
-const API_URL = '/api/comment';
+const API_URL = '/comment';
 
 export const createComment = async (postId: string, content: string, userId: string) => {
     const response = await axiosInstance.post(`${API_URL}`, { postId, content, userId });

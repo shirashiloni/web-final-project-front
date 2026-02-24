@@ -3,22 +3,22 @@ import axiosInstance from '../utils/http';
 
 
 export const createPost = async (data: IPostCreate) => {
-  const response = await axiosInstance.post('/api/post', data);
+  const response = await axiosInstance.post('/post', data);
   return response.data;
 };
 
 export const getPosts = async (query: PostQuery): Promise<{ data: Post[] }> => {
-  const response = await axiosInstance.get('/api/post', { params: query });
+  const response = await axiosInstance.get('/post', { params: query });
   return response.data;
 };
 
 export const getPostsBySmartSearch = async (searchText: string): Promise<{ data: Post[] }> => {
-  const response = await axiosInstance.get('/api/post/search', { params: { q: searchText } });
+  const response = await axiosInstance.get('/post/search', { params: { q: searchText } });
   return response.data;
 };
 
 export const deletePost = async (postId: string): Promise<void> => {
-  await axiosInstance.delete(`/api/post/${postId}`);
+  await axiosInstance.delete(`/post/${postId}`);
 };
 
 export const updatePost = async (postId: string, data: IPostUpdate): Promise<Post> => {
