@@ -15,6 +15,7 @@ import {
 
 import type { Post } from '../types/Post';
 import PostMenu from './PostMenu';
+import { normalizeImageUrl } from '../utils/imageUtils';
 
 type PostPreviewProps = {
   post: Post;
@@ -76,13 +77,7 @@ const PostPreview = ({ post, onClick }: PostPreviewProps) => {
         }
         <CardMedia
           sx={{ width: '100%', aspectRatio: '1' }}
-          image={
-            imageUrl?.startsWith('blob:') ||
-              imageUrl?.startsWith('http') ||
-              imageUrl?.startsWith('/api')
-              ? imageUrl
-              : `/api${imageUrl}`
-          }
+          image={normalizeImageUrl(imageUrl)}
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">

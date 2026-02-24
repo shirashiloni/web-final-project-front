@@ -8,6 +8,7 @@ import { usePosts } from '../hooks/usePosts';
 import CommentsSection from './CommentsSection';
 import { useUser } from '../hooks/useUser';
 import PostMenu from './PostMenu';
+import { normalizeImageUrl } from '../utils/imageUtils';
 
 type PostModalProps = {
   post: Post;
@@ -56,9 +57,7 @@ const PostModal = ({ post, onClose }: PostModalProps) => {
         <Box
           component="img"
           src={
-            post.imageUrl?.startsWith('blob:') || post.imageUrl?.startsWith('http')
-              ? post.imageUrl
-              : `/api${post.imageUrl}`
+            normalizeImageUrl(post.imageUrl) 
           }
           alt={post.caption}
           sx={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}

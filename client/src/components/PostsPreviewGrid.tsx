@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Typography, ImageList, ImageListItem } from '@mui/material';
 import PostModal from './PostModal';
 import type { Post } from '../types/Post';
+import { normalizeImageUrl } from '../utils/imageUtils';
 
 const PostsPreviewGrid = ({ posts }: { posts: Post[] }) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -33,7 +34,7 @@ const PostsPreviewGrid = ({ posts }: { posts: Post[] }) => {
               }}
             >
               <img
-                src={`/api${post.imageUrl}`}
+                src={normalizeImageUrl(post.imageUrl)}
                 alt={post.caption}
                 loading="lazy"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
