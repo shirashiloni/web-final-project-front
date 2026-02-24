@@ -17,13 +17,14 @@ const App = () => {
     <GoogleOAuthProvider clientId="377932721805-eqjcgh79s8ihem5c53cqls924k25i836.apps.googleusercontent.com">
       {!noTopBarRoutes.includes(location.pathname) && <TopBar />}
       <Routes>
-        <Route index path="/login" element={<LoginView />} />
+        <Route path="/login" element={<LoginView />} />
         <Route path="/register" element={<RegistrationView />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/"/>
+          <Route path="/" />
           <Route path="/explore" element={<FeedView />} />
           <Route path="/profile" element={<ProfileView />} />
           <Route path="/post" element={<ShareView />} />
+          <Route path="*" />
         </Route>
       </Routes>
     </GoogleOAuthProvider>
