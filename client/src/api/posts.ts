@@ -22,22 +22,22 @@ export const deletePost = async (postId: string): Promise<void> => {
 };
 
 export const updatePost = async (postId: string, data: IPostUpdate): Promise<Post> => {
-  const response = await axiosInstance.put(`/api/post/${postId}`, data);
+  const response = await axiosInstance.put(`/post/${postId}`, data);
   return response.data;
 };
 
 export const likePost = async (postId: string, userId: string): Promise<{ likeCount: number }> => {
-  const response = await axiosInstance.post(`/api/post/${postId}/like`, { userId });
+  const response = await axiosInstance.post(`/post/${postId}/like`, { userId });
   return response.data;
 };
 
 export const unlikePost = async (postId: string, userId: string): Promise<{ likeCount: number }> => {
-  const response = await axiosInstance.post(`/api/post/${postId}/unlike`, { userId });
+  const response = await axiosInstance.post(`/post/${postId}/unlike`, { userId });
   return response.data;
 };
 
 export const getUserLikeStatus = async (postId: string, userId: string): Promise<{ liked: boolean }> => {
-  const response = await axiosInstance.get(`/api/like/status?postId=${postId}&userId=${userId}`);
+  const response = await axiosInstance.get(`/like/status?postId=${postId}&userId=${userId}`);
   return response.data;
 };
 
